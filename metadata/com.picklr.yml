@@ -1,0 +1,16 @@
+Categories:
+  - Sports & Health
+License: Unknown
+AuthorName: Sam Heyman
+SourceCode: https://github.com/sewpersam/picklr
+
+AutoName: Picklr
+Summary: Pickleball play diagram tool
+Description: |
+  Draw and share pickleball play diagrams.
+
+AllowedAPKSigningKeys:
+  - 5a6c0d5a65b88a770751a44213ceed5464a91b81e3510ce229b7057aa641139a
+
+CurrentVersion: "1.0.0"
+CurrentVersionCode: 1
