@@ -24,7 +24,8 @@ jobs:
       - name: Install fdroidserver
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y fdroidserver
+          sudo apt-get install -y aapt apksigner
+          pip install fdroidserver
 
       - name: Rebuild index with fdroidserver
         env:
