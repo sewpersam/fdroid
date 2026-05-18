@@ -20,26 +20,22 @@ jobs:
         run: |
           echo "${{ secrets.FDROID_KEYSTORE_BASE64 }}" | base64 -d > /tmp/fdroid.keystore
 
+      - name: Install fdroidserver
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y fdroidserver
+
       - name: Rebuild index with fdroidserver
         env:
           KEYSTORE_PASS: ${{ secrets.FDROID_KEYSTORE_PASS }}
           KEY_PASS: ${{ secrets.FDROID_KEY_PASS }}
         run: |
-          docker run --rm \
-            -e KEYSTORE_PASS="$KEYSTORE_PASS" \
-            -e KEY_PASS="$KEY_PASS" \
-            -v "${{ github.workspace }}:/repo" \
-            -v "/tmp/fdroid.keystore:/fdroid.keystore" \
-            -w /repo \
-            registry.gitlab.com/fdroid/ci-images-server:latest \
-            bash -c "
-              fdroid update \
-                --keystore /fdroid.keystore \
-                --repo-keyalias fdroid \
-                --keystorepass \"\$KEYSTORE_PASS\" \
-                --keypass \"\$KEY_PASS\" \
-                --delete-unknown
-            "
+          fdroid update \
+            --keystore /tmp/fdroid.keystore \
+            --repo-keyalias fdroid \
+            --keystorepass "$KEYSTORE_PASS" \
+            --keypass "$KEY_PASS" \
+            --delete-unknown
 
       - name: Commit updated index
         run: |
