@@ -31,12 +31,14 @@ jobs:
           KEYSTORE_PASS: ${{ secrets.FDROID_KEYSTORE_PASS }}
           KEY_PASS: ${{ secrets.FDROID_KEY_PASS }}
         run: |
-          fdroid update \
-            --keystore /tmp/fdroid.keystore \
-            --repo-keyalias fdroid \
-            --keystorepass "$KEYSTORE_PASS" \
-            --keypass "$KEY_PASS" \
-            --delete-unknown
+          cat > config.yml <<EOF
+          keystore: /tmp/fdroid.keystore
+          repo_keyalias: fdroid
+          keystorepass: "${KEYSTORE_PASS}"
+          keypass: "${KEY_PASS}"
+          keydname: "CN=fdroid, OU=fdroid, O=fdroid, L=fdroid, ST=fdroid, C=UK"
+          EOF
+          fdroid update --delete-unknown
 
       - name: Commit updated index
         run: |
