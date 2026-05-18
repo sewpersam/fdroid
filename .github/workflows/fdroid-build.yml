@@ -1,0 +1,52 @@
+name: Rebuild F-Droid Index
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'repo/*.apk'
+      - 'metadata/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.FDROID_KEYSTORE_BASE64 }}" | base64 -d > /tmp/fdroid.keystore
+
+      - name: Rebuild index with fdroidserver
+        env:
+          KEYSTORE_PASS: ${{ secrets.FDROID_KEYSTORE_PASS }}
+          KEY_PASS: ${{ secrets.FDROID_KEY_PASS }}
+        run: |
+          docker run --rm \
+            -e KEYSTORE_PASS="$KEYSTORE_PASS" \
+            -e KEY_PASS="$KEY_PASS" \
+            -v "${{ github.workspace }}:/repo" \
+            -v "/tmp/fdroid.keystore:/fdroid.keystore" \
+            -w /repo \
+            registry.gitlab.com/fdroid/ci-images-server:latest \
+            bash -c "
+              fdroid update \
+                --keystore /fdroid.keystore \
+                --repo-keyalias fdroid \
+                --keystorepass \"\$KEYSTORE_PASS\" \
+                --keypass \"\$KEY_PASS\" \
+                --delete-unknown
+            "
+
+      - name: Commit updated index
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add repo/
+          git diff --staged --quiet && echo "No index changes" || (
+            git commit -m "chore: rebuild F-Droid index [skip ci]"
+            git push
+          )
